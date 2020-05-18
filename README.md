@@ -5,7 +5,8 @@
 Needed is a RS485 Dongle for the Solar charge controller and optional one for the Display MT50.
 
 ## Features
-Tested with Tracer BN 3215 but probably works with every Tracer that supports the Display MT50 (Modbus protocol)
+Tested with Tracer BN 3215 but probably works with other Tracer that supports the Display MT50 (Modbus protocol) also, but I can't test it.
+The Display use a undocumented Function (0x43) and I can only store the whole Header info (don't know what it mean)
 This Program is split into a Client part (tracerclient) and a Server part (tracerserver).
 The Client is connected to the Tracer Solarchargecontroller and receives all the Registers like the Display MT50,
 and forward it to the Server.
