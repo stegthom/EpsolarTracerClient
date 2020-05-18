@@ -1,4 +1,4 @@
-# Tracerclient
+# EpsolarTracerClient
  Read Data from Epever Tracer Solar Charge Controller and send to Tracerserver and also send to a Display MT50 if connected.
 
 ## Getting Started
