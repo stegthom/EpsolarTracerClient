@@ -1724,7 +1724,7 @@ int cMemory::GetDeviceInfo(int type, uint8_t *deviceinfo, int deviceinfolenght)
 }
 
 
-std::string cMemory::GetRegStr (uint16_t adress)
+std::string cMemory::GetRegStr (uint16_t adress, bool orig)
 {
 	std::lock_guard<std::mutex> lock(mem_mtx);
 	int n = -1;
@@ -1780,7 +1780,7 @@ std::string cMemory::GetRegStr (uint16_t adress)
 			{
 				try
 				{
-				if (Register[n].HaveAlternateValue)
+				if (Register[n].HaveAlternateValue && !orig)
 					value = std::to_string(Register[n].AlternateValue);
 				else
 					value = std::to_string(Register[n].Value);
@@ -1793,7 +1793,7 @@ std::string cMemory::GetRegStr (uint16_t adress)
 			else
 			{
 				int16_t tmp;
-				if (Register[n].HaveAlternateValue)
+				if (Register[n].HaveAlternateValue && !orig)
 					std::memcpy(&tmp, &Register[n].AlternateValue, sizeof(tmp));
 				else
 					std::memcpy(&tmp, &Register[n].Value, sizeof(tmp));
@@ -1848,7 +1848,7 @@ std::string cMemory::GetCoilStr (uint16_t adress)
 	return value;
 }
 	
-std::string cMemory::GetRegStr32 (uint16_t adress)
+std::string cMemory::GetRegStr32 (uint16_t adress, bool orig)
 {
 	std::lock_guard<std::mutex> lock(mem_mtx);
 	int n[2] = {-1, -1};
@@ -1919,7 +1919,7 @@ std::string cMemory::GetRegStr32 (uint16_t adress)
 		{
 			uint16_t tmp[2];
 			uint32_t tmp32;
-			if (Register[n[0]].HaveAlternateValue && Register[n[1]].HaveAlternateValue)
+			if (Register[n[0]].HaveAlternateValue && Register[n[1]].HaveAlternateValue && !orig)
 			{
 				tmp[0] = Register[n[0]].AlternateValue;
 				tmp[1] = Register[n[1]].AlternateValue;

@@ -213,10 +213,10 @@ class cMemory
       int GetDeviceInfo(int type, uint8_t *deviceinfo, int deviceinfolenght);
 	  
 	  // Return a std::string containing the Register Value
-	  std::string GetRegStr (uint16_t adress);
+	  std::string GetRegStr (uint16_t adress, bool orig = false);
 	  
 	  // Return a std::string containing the Register Value of double sized Registers starting at adress. The Low Byte Register must e the first.
-	  std::string GetRegStr32 (uint16_t adress);
+	  std::string GetRegStr32 (uint16_t adress, bool orig = false);
 	  
 	  // Return a std::string containing the Coil Value
 	  std::string GetCoilStr (uint16_t adress);

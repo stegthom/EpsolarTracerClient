@@ -337,6 +337,14 @@ if (command.at(0).compare("getreg") == 0)
 		}
 		else
 		{
+			bool orig = false;
+			if (command_num > 2)
+			{
+				if ((command.at(2).compare("true") == 0) || (command.at(2).compare("1") == 0))
+				{
+					orig = true;
+				}
+			}
 			uint16_t adress;
 			try
 			{
@@ -349,7 +357,7 @@ if (command.at(0).compare("getreg") == 0)
 			}
 			
 			confirmation.clear();
-			confirmation = memory.GetRegStr (adress);
+			confirmation = memory.GetRegStr (adress, orig);
 		}
 	}
 	
@@ -391,6 +399,14 @@ if (command.at(0).compare("getreg") == 0)
 		}
 		else
 		{
+			bool orig = false;
+			if (command_num > 2)
+			{
+				if ((command.at(2).compare("true") == 0) || (command.at(2).compare("1") == 0))
+				{
+					orig = true;
+				}
+			}
 			uint16_t adress;
 			try
 			{
@@ -402,7 +418,7 @@ if (command.at(0).compare("getreg") == 0)
 				adress = 0;
 			}
 			confirmation.clear();
-			confirmation = memory.GetRegStr32 (adress);
+			confirmation = memory.GetRegStr32 (adress, orig);
 		}
 	}
 
@@ -918,8 +934,8 @@ std::string cMtcpClientHandle::PrintHelp()
 	confirmation.append("Tracer mtcp Server Usage:\n");
 	confirmation.append("[COMMAND] [ADRESS] [VALUE]\n");
 	confirmation.append("Commandlist:\n");
-	confirmation.append("getreg [Adress]                - Get Register Value\n");
-	confirmation.append("getreg32 [Adress]              - Get Register Value for 32bit Registers. Adress must point to the L Byte and the next one must be the H Byte.\n");
+	confirmation.append("getreg [Adress] [bool orig]    - Get Register Value optional: if [bool orig] is true or 1 not the alternate Value is returned\n");
+	confirmation.append("getreg32 [Adress] [bool orig]  - Get Register Value for 32bit Registers. Adress must point to the L Byte and the next one must be the H Byte. optional: if [bool orig] is true or 1 not the alternate Value is returned\n");
 	confirmation.append("setreg [Adress] [Value]        - Set Register Value\n");
 	confirmation.append("setreg32 [Adress] [Value]      - Set Register Value for 32bit Registers. Adress must point to the L Byte and the next one must be the H Byte.\n");
 	confirmation.append("getchargemode                  - Return Charging Mode (NO, Float, Boost, Equlization) as String\n");
