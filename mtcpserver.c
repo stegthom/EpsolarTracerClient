@@ -310,6 +310,7 @@ std::string cMtcpClientHandle::handlecommand(int lenght, char* req)
 //setreg: Save Value as alternate in Register.
 //setreg32: Save Value as alternate in 2 Register starting at Adress.
 //getchargemode:  Return Charging Mode (NO, Float, Boost, Equlization) as String
+//getoutputstatus: Return Outputstatus of Discharging device (1 = Running, 0 = Standby)
 //debumem: DebugOutput of Memory
 //cleanmem: clean the complete Memory
 //cleanalternate: clean only memory entrys set by user with setreg(32)
@@ -541,6 +542,23 @@ if (command.at(0).compare("getreg") == 0)
 			confirmation = "Equlization Charging\n";
 		
 		
+	}
+	
+//--- getoutputstatus--- Register 3202 - Bit D0
+
+	else if (command.at(0).compare("getoutputstatus") == 0)
+	{
+		uint16_t adress = 0x3202;
+		uint16_t reg;
+		uint16_t result;
+		const uint16_t masq = 1;  //b00000001   Masq to set all bit except bit 0 to 0
+		memory.GetRegister(adress, adress, &reg, 1, true);
+		result = (reg & masq); //set all bits except bit 0
+		confirmation.clear();
+		if (result == 0)
+			confirmation = "0\n";
+		else if (result == 1)
+			confirmation = "1\n";
 	}
 	
 //---debugmem
@@ -939,6 +957,7 @@ std::string cMtcpClientHandle::PrintHelp()
 	confirmation.append("setreg [Adress] [Value]        - Set Register Value\n");
 	confirmation.append("setreg32 [Adress] [Value]      - Set Register Value for 32bit Registers. Adress must point to the L Byte and the next one must be the H Byte.\n");
 	confirmation.append("getchargemode                  - Return Charging Mode (NO, Float, Boost, Equlization) as String\n");
+	confirmation.append("getoutputstatus                - Return Outputstatus of Discharging device (1 = Running, 0 = Standby)\n");
 	confirmation.append("debugmem                       - Print Output of the internal Memory Structur\n");
 	confirmation.append("cleanmem                       - Clean all Values of the internal Memory Structur\n");
 	confirmation.append("cleanalternate                 - Clean only User Values added by SETREG or SETREG32\n");
