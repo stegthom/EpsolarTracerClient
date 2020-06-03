@@ -23,8 +23,10 @@
 #include <stdint.h>
 #include <mutex>
 
-#define TIMEOUT_T1_5 1750 //Overide Inter char Timeout 0 not Overide
-#define TIMEOUT_T3_5 0 //Overide Frame Timeout 0 not overide
+//#define TIMEOUT_T1_5 1750 //Overide Inter char Timeout 0 not Overide
+//#define TIMEOUT_T3_5 0 //Overide Frame Timeout 0 not overide
+#define TIMEOUT_T1_5 3000 //Overide Inter char Timeout 0 not Overide
+#define TIMEOUT_T3_5 6000 //Overide Frame Timeout 0 not overide
 
 
 #define MODBUS_RTU_MAX_ADU_LENGTH 256
