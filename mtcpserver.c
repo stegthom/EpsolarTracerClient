@@ -321,6 +321,8 @@ std::string cMtcpClientHandle::handlecommand(int lenght, char* req)
 //triggertracerstatisticupdate
 //writeholdingregister
 //modbussend: Send a raw Modbus Message to Tracer (Function 0x05 and 0x10 Triggers a complete Data Update on Client and Server)
+//outputon: Switch Tracer Output on
+//outputoff: Switch Tracer Output off
 //switch: Switch one of the switches defined in memmory.conf on or off
 //setcoil: Set UserCoil
 //getcoil: Get UserCoil
@@ -857,6 +859,142 @@ else if (command.at(0).compare("modbussend") == 0)
 			}
 		}
 	}
+
+//outputon
+else if (command.at(0).compare("outputon") == 0)
+	{
+		if (cTracerCtr::IsTracerConnected())
+		{
+			cTracerCtr *tracerctr = NULL;
+			tracerctr = cTracerCtr::GetInstance();
+			if (tracerctr)
+			{
+				uint8_t req[] = {0x01, 0x0F, 0x00, 0x02, 0x00, 0x01, 0x01, 0x01}; //write multiple Coils
+				uint8_t rsp[MODBUS_RTU_MAX_ADU_LENGTH];
+				int rc = 0;
+				rc = tracerctr->modbus_send_request(req, 8, rsp);
+				confirmation.clear();
+				if (rc < 2)
+				{
+					confirmation = "Error wrong Modbus Request\n";
+					return confirmation;
+				}
+				else
+				{
+					if (rsp[1] == 0x0F)
+					{
+						confirmation = "OK\n";
+						return confirmation;
+					}
+					else
+					{
+						confirmation = "Error\n";
+						return confirmation;
+					}
+				}
+			}
+			else
+			{
+				confirmation.clear();
+				confirmation = "Error No Instance of cTracerctr received\n";
+			}
+		}
+		else
+		{
+			if(mtcpclient)
+			{
+				if (mtcpclient->connect() == -1)
+				{
+					confirmation.clear();
+					confirmation = "cMtcpClient: Error Forward Message to Client: Connection Error\n";
+					return confirmation;
+				}
+				if (mtcpclient->send(req, lenght) == -1)
+				{
+					confirmation.clear();
+					confirmation = "cMtcpClient: Error Forward Message to Client: Send Error\n";
+					return confirmation;
+				}
+				int recvlenght = mtcpclient->recv(recvmessage, RECVBUFSIZE);
+				confirmation.clear();
+				confirmation.assign(recvmessage, recvlenght);
+				mtcpclient->closeconnection();
+			}
+			else
+			{
+				confirmation.clear();
+				confirmation = "Tracer not locally connected\n";
+			}
+		}	
+	}
+	
+	//outputoff
+else if (command.at(0).compare("outputoff") == 0)
+	{
+		if (cTracerCtr::IsTracerConnected())
+		{
+			cTracerCtr *tracerctr = NULL;
+			tracerctr = cTracerCtr::GetInstance();
+			if (tracerctr)
+			{
+				uint8_t req[] = {0x01, 0x0F, 0x00, 0x02, 0x00, 0x01, 0x01, 0x00}; //write multiple Coils
+				uint8_t rsp[MODBUS_RTU_MAX_ADU_LENGTH];
+				int rc = 0;
+				rc = tracerctr->modbus_send_request(req, 8, rsp);
+				confirmation.clear();
+				if (rc < 2)
+				{
+					confirmation = "Error wrong Modbus Request\n";
+					return confirmation;
+				}
+				else
+				{
+					if (rsp[1] == 0x0F)
+					{
+						confirmation = "OK\n";
+						return confirmation;
+					}
+					else
+					{
+						confirmation = "Error\n";
+						return confirmation;
+					}
+				}
+			}
+			else
+			{
+				confirmation.clear();
+				confirmation = "Error No Instance of cTracerctr received\n";
+			}
+		}
+		else
+		{
+			if(mtcpclient)
+			{
+				if (mtcpclient->connect() == -1)
+				{
+					confirmation.clear();
+					confirmation = "cMtcpClient: Error Forward Message to Client: Connection Error\n";
+					return confirmation;
+				}
+				if (mtcpclient->send(req, lenght) == -1)
+				{
+					confirmation.clear();
+					confirmation = "cMtcpClient: Error Forward Message to Client: Send Error\n";
+					return confirmation;
+				}
+				int recvlenght = mtcpclient->recv(recvmessage, RECVBUFSIZE);
+				confirmation.clear();
+				confirmation.assign(recvmessage, recvlenght);
+				mtcpclient->closeconnection();
+			}
+			else
+			{
+				confirmation.clear();
+				confirmation = "Tracer not locally connected\n";
+			}
+		}	
+	}
 	
 //switch	
 	else if (command.at(0).compare("switch") == 0)
@@ -967,6 +1105,8 @@ std::string cMtcpClientHandle::PrintHelp()
 	confirmation.append("triggertracerrealtimeupdate    - Receive all Realtime Data from Tracer\n");
 	confirmation.append("triggertracerstatisticupdate   - Receive all Statistic Data from Tracer\n");
 	confirmation.append("modbussend                     - Send a raw Modbus Message to Tracer (Function 0x05 and 0x10 Triggers a complete Data update\n");
+	confirmation.append("outputon                       - Switch Tracer Output On\n");
+	confirmation.append("outputoff                      - Switch Tracer Output Off\n");
 	confirmation.append("switch                         - Switch one of the switches defined in memmory.conf on or off (1 or 0)\n");
 	confirmation.append("getcoil [Adress]               - Get UserCoil Value\n");
 	confirmation.append("setcoil [Adress] [Value]       - Set UserCoil Value\n");
