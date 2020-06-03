@@ -86,7 +86,8 @@ cTracerCtr *tracerctr = NULL;
 time_t Now, LastTracerStatisticUpdate, LastTracerRealtimeUpdate;
 time_t LastServerRealtimeUpdate, LastServerStatisticUpdate;
 
-int ReadTracerInfo();
+int ReadTracerInfo1();
+int ReadTracerInfo2();
 int ReadRatedData();
 int ReadRealTimeData();
 int ReadRealTimeStatus();
@@ -290,7 +291,20 @@ if (NeedTracerStatisticupdate)
    {
       for (n = 0; n<4; n++)
 	  {
-	     if (ReadTracerInfo() < 0)
+	     if (ReadTracerInfo1() < 0)
+	       {
+		  LOG("Retry Reading\n");
+		  continue;
+	       }
+	     else
+	       {
+		  break;
+	       }
+	  }
+	  
+	  for (n = 0; n<4; n++)
+	  {
+	     if (ReadTracerInfo2() < 0)
 	       {
 		  LOG("Retry Reading\n");
 		  continue;
@@ -457,7 +471,7 @@ if (NeedServerRealtimeupdate && client)
    
 }
 
-int ReadTracerInfo()
+int ReadTracerInfo1()
 {
    int rc;
    uint8_t rsp[MODBUS_RTU_MAX_ADU_LENGTH];
@@ -465,7 +479,7 @@ int ReadTracerInfo()
    rc = 0;
    rc = tracerctr->modbus_send_request(GetDeviceInfo1, 5 * sizeof(uint8_t), rsp);
 
-   if (rc < 0)
+   if (rc <= 0)
      {
 	LOG("Error Receive DeviceInfo1");
 	return -1;
@@ -478,13 +492,17 @@ int ReadTracerInfo()
 	       return -1;
 	    }
      }
-	
+	 return 1;
+}
 	 
-   
+int ReadTracerInfo2()
+{
+	int rc;
+   uint8_t rsp[MODBUS_RTU_MAX_ADU_LENGTH];
    rc = 0;
    rc = tracerctr->modbus_send_request(GetDeviceInfo2, 5 * sizeof(uint8_t), rsp);
  
-   if (rc < 0)
+   if (rc <= 0)
      {
         LOG("Error Receive DeviceInfo2\n");
         return -1;
@@ -508,7 +526,7 @@ int ReadRatedData()
    rc = 0;
    rc = tracerctr->modbus_send_request(GetReg3000t300E, 6 * sizeof(uint8_t), rsp);
  
-if (rc < 0)
+if (rc <= 0)
      {
         LOG("Error Receive Register 3000\n");
         return -1;
@@ -854,7 +872,7 @@ int ReadDiscreteInput()
 	   rc = 0;
 	   rc = tracerctr->modbus_send_request(GetDiscInp2000, 6 * sizeof(uint8_t), rsp);
  
-if (rc < 0)
+if (rc <= 0)
      {
         LOG("Error Receive Discrete Input 2000\n");
         return -1;
@@ -874,7 +892,7 @@ if (rc < 0)
    rc = 0;
    rc = tracerctr->modbus_send_request(GetDiscInp200C, 6 * sizeof(uint8_t), rsp);
   
-   if (rc < 0)
+   if (rc <= 0)
      {
 	LOG("Error Receive Discrete Input 200C\n");
         return -1;
