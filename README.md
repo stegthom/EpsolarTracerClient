@@ -43,6 +43,11 @@ make tracertest
 ```
 make displaytest
 ```
+Modbussend Added for Sending Requests to the Tracer:
+
+```
+make modbussend
+```
 
 ### Usage
 To Get Usage Info:
