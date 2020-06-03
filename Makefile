@@ -15,6 +15,7 @@ OBJCLIENT = tracerclient.o client.o
 OBJSERVER = tracerserver.o server.o
 OBJDISPLAY = displaytest.o modbus.o
 OBJTRACER  = tracertest.o modbus.o
+OBJMODBUSSEND = modbussend.o modbus.o
 
 all: client server
 
@@ -29,12 +30,15 @@ displaytest: $(OBJDISPLAY)
 	
 tracertest: $(OBJTRACER)
 	$(CXX) $(CXXFLAGS) -o tracertest $(OBJTRACER) $(LIBS)
+	
+modbussend: $(OBJMODBUSSEND)
+	$(CXX) $(CXXFLAGS) -o modbussend $(OBJMODBUSSEND) $(LIBS)
 
 
 %.o: %.c
 	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) $<
 
 clean:
-	rm -rf tracerclient tracerserver tracertest displaytest $(OBJCOMMON) $(OBJCLIENT) $(OBJSERVER) $(OBJDISPLAY) $(OBJTRACER)
+	rm -rf tracerclient tracerserver tracertest displaytest modbussend $(OBJCOMMON) $(OBJCLIENT) $(OBJSERVER) $(OBJDISPLAY) $(OBJTRACER) $(OBJMODBUSSEND)
 
 
