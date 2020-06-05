@@ -1159,9 +1159,12 @@ void SaveTimestamp()
 	uint16_t year;
 	uint16_t hour;
 	uint16_t min;
-	uint8_t payload[10];
+	uint16_t sec;
+	uint8_t payload[16];
 	time_t Timestamp;
 	uint16_t startadress;
+	uint32_t UnixTimestamp;
+	uint16_t UnixTimestampLH[2];
 	startadress = 0x3330;
     tm *now;
     Timestamp = time(0);
@@ -1171,14 +1174,25 @@ void SaveTimestamp()
 	year = (now->tm_year+1900);
 	hour = now->tm_hour;
 	min = now->tm_min;
+	sec = now->tm_sec;
+	
+	UnixTimestamp = (uint32_t)Timestamp;
+	
+	MODBUS_SET_INT32_TO_INT16(UnixTimestampLH, 0, UnixTimestamp);
 	
 	MODBUS_SET_INT16_TO_INT8(payload, 0, day);
 	MODBUS_SET_INT16_TO_INT8(payload, 2, mon);
 	MODBUS_SET_INT16_TO_INT8(payload, 4, year);
 	MODBUS_SET_INT16_TO_INT8(payload, 6, hour);
 	MODBUS_SET_INT16_TO_INT8(payload, 8, min);
+	MODBUS_SET_INT16_TO_INT8(payload, 10, sec);
+	MODBUS_SET_INT16_TO_INT8(payload, 12, UnixTimestampLH[1]); //low Byte
+	MODBUS_SET_INT16_TO_INT8(payload, 14, UnixTimestampLH[0]); //high Byte
+
 	
-	memory.Save(eReg, startadress, 10, payload);
+
+	
+	memory.Save(eReg, startadress, 16, payload);
 }
 
 	
