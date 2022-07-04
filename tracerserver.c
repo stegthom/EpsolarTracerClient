@@ -36,12 +36,14 @@
 #include "mttp.h"
 #include "display.h"
 #include "mtcpserver.h"
+#include "modbusserver.h"
 
 cMemory memory;
 cServer *server = NULL;
 cDisplay *display = NULL;
 cMtcpServer *mtcpserver = NULL;
 cMtcpClient *mtcpclient = NULL;
+cModbusServer *modbusserver = NULL;
 
 static bool KillMe = false;
 
@@ -59,6 +61,7 @@ int main( int argc, char* argv[] )
 	bool daemonmode = false;
     bool displayhelp = false;
     bool displayversion = false;
+	bool startmodbusserver = false;
 	std::string mtcpforwardip;
 	int mtcpforwardport = 0;
 	std::string confdir;
@@ -70,6 +73,7 @@ int main( int argc, char* argv[] )
 	  { "mtcpforwardip",   	required_argument, NULL, 'i' },
 	  { "mtcpforwardport",  required_argument, NULL, 'x' },
 	  { "config", 		    required_argument, NULL, 'c' },
+	  { "modbusserver",     no_argument,       NULL, 'b' },
 	  { "daemon",     		no_argument,       NULL, 'd' },
       { "help",       		no_argument,       NULL, 'h' },
       { "version",    		no_argument,       NULL, 'v' },
@@ -77,7 +81,7 @@ int main( int argc, char* argv[] )
       };
 
 int c;
-while ((c = getopt_long(argc, argv, "D:p:m:i:x:c:dhv", long_options, NULL)) != -1)
+while ((c = getopt_long(argc, argv, "D:p:m:i:x:c:bdhv", long_options, NULL)) != -1)
      {
 	switch (c)
 	  {
@@ -91,6 +95,7 @@ while ((c = getopt_long(argc, argv, "D:p:m:i:x:c:dhv", long_options, NULL)) != -
 	   case 'i': mtcpforwardip = optarg; break;
 	   case 'x': mtcpforwardport = atoi(optarg); break;
 	   case 'c': confdir = optarg; break;
+	   case 'b': startmodbusserver = true; break;
 	   default: exit(0);
 	  }
      }
@@ -113,6 +118,7 @@ while ((c = getopt_long(argc, argv, "D:p:m:i:x:c:dhv", long_options, NULL)) != -
 			"-i IP		   --mtcpforwardip        Forward Commands to the tracerclient which can not handled locally\n"
 			"-x PORT       --mtcpforwardport      Forward Commands to the tracerclient which can not handled locally\n"
 			"-m PORT,      --mtcpserverport=PORT  The Server Port of the Controlling Interface\n"
+			"-b            --modbusserver         Start Modbus TCP Server on PORT 502\n"
 			"-c Config Dir --config               Config Directory that contain memory.conf\n"
 			"-d,           --daemon               Run as Daemon\n"
 		    "-h,           --help                 Show Usage\n"
@@ -144,13 +150,17 @@ while ((c = getopt_long(argc, argv, "D:p:m:i:x:c:dhv", long_options, NULL)) != -
 	  if (!confdir.empty())
 		  memory.addconfdir(confdir);
 	  
-	  
+	  if (startmodbusserver)
+		 modbusserver = new cModbusServer(502);
 	  
 	  if (display)
 			 display->Start();
 		 
 	  if (mtcpserver)
 		  mtcpserver->Start();
+	  
+	  if (modbusserver)
+		  modbusserver->Start();
 	  
 	  if(!mtcpforwardip.empty() && mtcpforwardport > 0 && !mtcpclient)
 	  {
@@ -226,6 +236,14 @@ signal(SIGTERM, SignalHandler);
 	 if (mtcpclient)
 	 {
 		 delete mtcpclient;
+	 }
+	 
+	 if (modbusserver)
+	 {
+		 LOG("Killing ModbusServer Thread\n");
+		 modbusserver->Abort();
+		 modbusserver->Join();
+		 delete modbusserver;
 	 }
 	 LOG("Tracerserver Shutdown complete\n");
 	 return 0;

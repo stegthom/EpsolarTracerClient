@@ -1449,7 +1449,7 @@ int cMemory::GetRegister(uint16_t startadress, uint16_t endadress, uint16_t *reg
    int startindex = GetRegStartIndex(startadress);
    if (startindex < 0)
      {
-	LOG("cMemory: Registe Start Adress not found\n");
+	LOG("cMemory: Register Start Adress not found: <%04X>\n",startadress);
 	return -1;
      }
    

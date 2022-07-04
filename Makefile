@@ -10,7 +10,7 @@ INCLUDES ?=
 DEFINES += -DDEBUG
 
 
-OBJCOMMON = memory.o mttp.o display.o mtcpserver.o tracerctr.o modbus.o
+OBJCOMMON = memory.o mttp.o display.o mtcpserver.o tracerctr.o modbus.o modbusserver.o
 OBJCLIENT = tracerclient.o client.o
 OBJSERVER = tracerserver.o server.o
 OBJDISPLAY = displaytest.o modbus.o

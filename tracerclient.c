@@ -38,6 +38,7 @@
 #include "mtcpserver.h"
 #include "tracerctr.h"
 #include "modbus.h"
+#include "modbusserver.h"
 
 
 //Request to send to the Tracer requiered for the Display MT50//
@@ -81,6 +82,7 @@ cClient *client = NULL;
 cDisplay *display = NULL;
 cMtcpServer *mtcpserver = NULL;
 cTracerCtr *tracerctr = NULL;
+cModbusServer *modbusserver = NULL;
 
 
 time_t Now, LastTracerStatisticUpdate, LastTracerRealtimeUpdate;
@@ -115,26 +117,28 @@ int main( int argc, char* argv[] )
    std::string server;
    int serverport = 0;
    int mtcpserverport = 0;
+   bool startmodbusserver = false;
    bool daemonmode = false;
    bool displayhelp = false;
    bool displayversion = false;
    std::string confdir;
    
    static struct option long_options[] = {
-      { "tracerdev",  required_argument, NULL, 'T' },
-      { "displaydev", required_argument, NULL, 'D' },
-      { "server",     required_argument, NULL, 's' },
-      { "serverport", required_argument, NULL, 'p' },
-	  { "mtcpport",   required_argument, NULL, 'm' },
-	  { "config", 	  required_argument, NULL, 'c' },
-	  { "daemon",     no_argument,       NULL, 'd' },
-      { "help",       no_argument,       NULL, 'h' },
-      { "version",    no_argument,       NULL, 'v' },
+      { "tracerdev",    required_argument, NULL, 'T' },
+      { "displaydev",   required_argument, NULL, 'D' },
+      { "server",       required_argument, NULL, 's' },
+      { "serverport",   required_argument, NULL, 'p' },
+	  { "mtcpport",     required_argument, NULL, 'm' },
+	  { "config", 	    required_argument, NULL, 'c' },
+	  { "modbusserver", no_argument,       NULL, 'b' },
+	  { "daemon",       no_argument,       NULL, 'd' },
+      { "help",         no_argument,       NULL, 'h' },
+      { "version",      no_argument,       NULL, 'v' },
       { NULL }
 };
 
 int c;
-while ((c = getopt_long(argc, argv, "T:D:s:p:m:c:dhv", long_options, NULL)) != -1)
+while ((c = getopt_long(argc, argv, "T:D:s:p:m:c:bdhv", long_options, NULL)) != -1)
      {
 	switch (c)
 	  {
@@ -150,6 +154,7 @@ while ((c = getopt_long(argc, argv, "T:D:s:p:m:c:dhv", long_options, NULL)) != -
 	   case 'v': displayversion = true; break;
 	   case 'm': mtcpserverport = atoi(optarg); break;
 	   case 'c': confdir = optarg; break;
+	   case 'b': startmodbusserver = true; break;
 	   default: exit(0);
 	  }
      }
@@ -169,6 +174,7 @@ while ((c = getopt_long(argc, argv, "T:D:s:p:m:c:dhv", long_options, NULL)) != -
 		    "-s IP,        --server=IP            The Server IP Adress or Hostname\n"
 		    "-p PORT,      --serverport=PORT      The Server Port\n"
 			"-m PORT,      --mtcpport=PORT        The Server Port of the Controlling Interface\n"
+			"-b            --modbusserver         Start Modbus TCP Server on PORT 502\n"
 			"-c Config Dir --config               Config Directory that contain memory.conf\n"
 			"-d,           --daemon               Run as Daemon\n"
 		    "-h,           --help                 Show Usage\n"
@@ -204,6 +210,9 @@ while ((c = getopt_long(argc, argv, "T:D:s:p:m:c:dhv", long_options, NULL)) != -
 	if (!confdir.empty())
 		  memory.addconfdir(confdir);
 	  
+	 if (startmodbusserver)
+		 modbusserver = new cModbusServer(502);
+	  
 	if (display)
 			 display->Start();
 		 
@@ -213,6 +222,9 @@ while ((c = getopt_long(argc, argv, "T:D:s:p:m:c:dhv", long_options, NULL)) != -
 		
 	if (mtcpserver)
 		  mtcpserver->Start();
+	  
+	if (modbusserver)
+		  modbusserver->Start();
 
    cTracerCtr::CreateInstance(true, tracerdev);
    tracerctr = cTracerCtr::GetInstance();
@@ -461,6 +473,15 @@ if (NeedServerRealtimeupdate && client)
 		 mtcpserver->Join();
 		 delete mtcpserver;
 	 }
+	 
+	 if (modbusserver)
+	 {
+		 LOG("Killing ModbusServer Thread\n");
+		 modbusserver->Abort();
+		 modbusserver->Join();
+		 delete modbusserver;
+	 }
+	 
 	 if (tracerctr)
 	 {
 	   tracerctr->DeleteInstance();
